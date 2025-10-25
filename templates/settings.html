@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-section">
+        <h3>Cấu Hình MQTT</h3>
+        <form id="mqttForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Host</label>
+                    <input type="text" name="mqtt_host" value="{{ settings.mqtt_host }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Port</label>
+                    <input type="number" name="mqtt_port" value="{{ settings.mqtt_port }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="mqtt_username" value="{{ settings.mqtt_username }}">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="mqtt_password" value="{{ settings.mqtt_password }}">
+                </div>
+                <div class="form-group">
+                    <label>Topic</label>
+                    <input type="text" name="mqtt_topic" value="{{ settings.mqtt_topic }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Ngưỡng nhận diện (0-1)</label>
+                    <input type="number" step="0.01" min="0" max="1" name="recognition_threshold" value="{{ settings.recognition_threshold }}" required>
+                </div>
+            </div>
+            <div class="mqtt-form-actions">
+                <button type="submit" class="btn btn-primary">Lưu Cài Đặt</button>
+                <button type="button" onclick="testMqtt()" class="btn btn-sm mqtt-test-btn">Test MQTT</button>
+                <span id="mqttTestStatus" class="mqtt-test-status"></span>
+                <span id="mqttTestMessage" class="mqtt-test-message"></span>
+            </div>
+        </form>
+    </div>
+
+    <div class="settings-section">
+        <h3>Model Nhận Diện</h3>
+                <!-- Inline Status Message for Model Change -->
+        <div id="modelStatus" class="status-message d-none">
+            <span id="modelStatusText"></span>
+        </div>
+        <div class="model-list">
+            {% for model in models %}
+            <div class="model-item {% if settings.current_model == model.name %}active{% endif %}">
+                <h4>{{ model.display_name }}</h4>
+                <p>{{ model.description }}</p>
+                <button onclick="changeModel('{{ model.name }}')" class="btn btn-sm">Chọn Model</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button onclick="retrainAll()" class="btn btn-primary retrain-all-btn">Train Lại Toàn Bộ</button>
+    </div>
+
+    <div class="settings-section">
+        <h3>Quản Lý Dữ Liệu</h3>
+        
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6">
+                <!-- Auto-Train Toggle -->
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <label class="setting-toggle">
+                            <input type="checkbox" id="autoTrainToggle" {% if settings.auto_train_enabled == 'true' %}checked{% endif %} 
+                                   onchange="toggleAutoTrain(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="setting-info">
+                            <h4>Bật Auto-Train (Tự động lưu ảnh khi nhận diện)</h4>
+                            <p class="text-muted mb-0">Khi bật, hệ thống sẽ tự động lưu ảnh nhận diện để cải thiện độ chính xác</p>
+                        </div>
+                    </div>
+                    <div id="autoTrainStatus" class="setting-status d-none"></div>
+                </div>
+
+                <!-- Max Images Selection -->
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <h4>Số ảnh tối đa mỗi người</h4>
+                    </div>
+                    <div class="setting-content">
+                        <div class="number-selector">
+                            <button type="button" class="btn-decrease" onclick="adjustMaxImages(-5)">-5</button>
+                            <button type="button" class="btn-decrease" onclick="adjustMaxImages(-1)">-1</button>
+                            <div class="number-display">
+                                <input type="number" id="maxImagesInput" 
+                                       value="{% if settings.max_images_per_person %}{{ settings.max_images_per_person }}{% else %}10{% endif %}" 
+                                       min="1" max="100" step="1" readonly>
+                                <span class="number-label">ảnh</span>
+                            </div>
+                            <button type="button" class="btn-increase" onclick="adjustMaxImages(1)">+1</button>
+                            <button type="button" class="btn-increase" onclick="adjustMaxImages(5)">+5</button>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm w-100 mt-2" onclick="applyMaxImages()">
+                            <i class="fas fa-check me-1"></i>Áp dụng
+                        </button>
+                        <p class="text-muted mt-2 mb-1" style="font-size: 0.85rem;">
+                            Khi đạt giới hạn, ảnh cũ nhất sẽ tự động bị xóa
+                        </p>
+                        <p class="text-warning mb-0" style="font-size: 0.85rem;">
+                            <strong>⚠️ Lưu ý:</strong> Khi giảm số ảnh tối đa (VD: 10→5), hệ thống sẽ TỰ ĐỘNG XÓA các ảnh cũ nhất để đảm bảo số lượng
+                        </p>
+                    </div>
+                    <div id="maxImagesStatus" class="setting-status d-none"></div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-6">
+                <!-- Voting Top-K Selection -->
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <h4>Số ảnh dùng cho Voting (Hybrid Matching)</h4>
+                    </div>
+                    <div class="setting-content">
+                        <div class="radio-group">
+                            <label class="radio-option {% if settings.voting_top_k == '2' %}active{% endif %}">
+                                <input type="radio" name="votingTopK" value="2" 
+                                       {% if settings.voting_top_k == '2' %}checked{% endif %}
+                                       onchange="setVotingTopK(2)">
+                                <span class="radio-label">
+                                    <span class="radio-number">2</span>
+                                    <span class="radio-text">ảnh</span>
+                                </span>
+                            </label>
+                            <label class="radio-option {% if settings.voting_top_k == '3' or not settings.voting_top_k %}active{% endif %}">
+                                <input type="radio" name="votingTopK" value="3" 
+                                       {% if settings.voting_top_k == '3' or not settings.voting_top_k %}checked{% endif %}
+                                       onchange="setVotingTopK(3)">
+                                <span class="badge-star">⭐</span>
+                                <span class="radio-label">
+                                    <span class="radio-number">3</span>
+                                    <span class="radio-text">ảnh</span>
+                                </span>
+                            </label>
+                            <label class="radio-option {% if settings.voting_top_k == '5' %}active{% endif %}">
+                                <input type="radio" name="votingTopK" value="5" 
+                                       {% if settings.voting_top_k == '5' %}checked{% endif %}
+                                       onchange="setVotingTopK(5)">
+                                <span class="radio-label">
+                                    <span class="radio-number">5</span>
+                                    <span class="radio-text">ảnh</span>
+                                </span>
+                            </label>
+                        </div>
+                        <p class="text-muted mt-2 mb-0" style="font-size: 0.85rem;">
+                            Nếu người có ≥K ảnh: dùng trung bình top-K scores (chống nhiễu). Nếu &lt;K ảnh: dùng best single score
+                        </p>
+                    </div>
+                    <div id="votingStatus" class="setting-status d-none"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="setting-item">
+                    <div class="setting-header mb-2">
+                        <div class="setting-info">
+                            <h4>Xóa dữ liệu</h4>
+                            <p class="text-muted mb-0" style="font-size: 0.85rem;">
+                                Hệ thống tự động giữ tối đa <strong>30 bản ghi history</strong> gần nhất. 
+                                Ảnh cũ hơn sẽ tự động xóa khi có bản ghi mới.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button onclick="clearHistory()" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash-alt me-2"></i>Xóa Toàn Bộ Lịch Sử
+                        </button>
+                        <button onclick="clearAll()" class="btn btn-danger btn-sm">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Xóa Toàn Bộ Dữ Liệu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="history-list">
+    {% for record in history %}
+    <div class="history-item" id="history-{{ record.id }}">
+        <div class="history-thumbnail" onclick="showImagePreview('{{ url_for('static', filename=record.image_path.replace('static/', '')) }}', '{{ record.nickname or record.person_name }}')">
+            {% if record.thumbnail_path %}
+            <img id="history-img-{{ record.id }}" src="{{ url_for('static', filename=record.thumbnail_path.replace('static/', '')) }}" alt="Thumbnail">
+            {% if record.bbox_info %}
+            <canvas data-bbox='{{ record.bbox_info }}' data-person="{{ record.person_name }}"></canvas>
+            {% endif %}
+            <div class="zoom-indicator">🔍</div>
+            {% endif %}
+        </div>
+        <div class="history-info">
+            <p><strong>Tên:</strong> {{ record.person_name }}</p>
+            {% if record.nickname %}
+            <p><strong>Nickname:</strong> {{ record.nickname }}</p>
+            {% endif %}
+            <p><strong>Chính xác:</strong> {{ (record.score * 100)|round|int }}%</p>
+            <p><strong>Thời gian:</strong> <span class="timestamp" data-timestamp="{{ record.timestamp }}">{{ record.timestamp }}</span></p>
+        </div>
+        <div class="history-actions">
+            {% if record.person_name|lower == 'unknown' or record.person_id is none %}
+            <button onclick="showAddPersonModal({{ record.id }})" class="btn btn-sm btn-primary" title="Thêm vào hệ thống">➕ Thêm</button>
+            <button onclick="deleteHistory({{ record.id }})" class="btn btn-sm btn-secondary" title="Xóa khỏi lịch sử">Xóa</button>
+            {% elif record.trained_image_id %}
+            <button onclick="undoRecognition({{ record.id }})" class="btn btn-sm btn-danger" title="Hoàn tác và xóa ảnh đã tự động train">Undo</button>
+            {% else %}
+            <button onclick="deleteHistory({{ record.id }})" class="btn btn-sm btn-secondary" title="Xóa khỏi lịch sử">Xóa</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not history %}
+<p class="no-data">Chưa có lịch sử nhận diện</p>
+{% endif %}
+
+<!-- Add Person Modal -->
+<div id="addPersonModal" class="modal d-none">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddPersonModal()">&times;</span>
+        <h2>Thêm Người Vào Hệ Thống</h2>
+        
+        <div class="modal-button-grid">
+            <button onclick="showNewPersonForm()" class="btn btn-primary">
+                👤 Tạo Người Mới
+            </button>
+            <button onclick="showExistingPersonForm()" class="btn btn-secondary">
+                ➕ Thêm Vào Người Cũ
+            </button>
+        </div>
+        
+        <!-- New Person Form -->
+        <div id="newPersonForm" class="d-none">
+            <h3>Tạo Người Mới</h3>
+            <div class="form-group">
+                <label for="newPersonNickname">Nickname (*) - Tên hiển thị:</label>
+                <input type="text" id="newPersonNickname" placeholder="VD: Việt Anh" required>
+            </div>
+            <div class="form-group">
+                <label for="newPersonName">Tên (*) - Tự động tạo (có thể chỉnh sửa):</label>
+                <input type="text" id="newPersonName" placeholder="Sẽ tự động điền..." required>
+                <small id="newPersonNamePreview" style="color: #667eea; font-weight: 600; display: block; margin-top: 0.25rem;">Nhập Nickname để tự động tạo tên</small>
+            </div>
+            <button onclick="addToNewPerson()" class="btn btn-primary">Tạo & Thêm Ảnh</button>
+        </div>
+        
+        <!-- Existing Person Form -->
+        <div id="existingPersonForm" class="d-none">
+            <h3>Thêm Vào Người Cũ</h3>
+            <div class="form-group">
+                <label for="existingPersonSelect">Chọn người:</label>
+                <select id="existingPersonSelect">
+                    <option value="">-- Chọn người --</option>
+                    {% for person in persons %}
+                    <option value="{{ person.id }}">{{ person.nickname or person.name }} ({{ person.name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button onclick="addToExistingPerson()" class="btn btn-primary">Thêm Ảnh</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,8 @@
+# .gitignore additions for Home Assistant addon
+
+# Addon build artifacts
+homeassistant/*.tar.gz
+homeassistant/build/
+
+# Local addon testing
+.addons/

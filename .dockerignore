@@ -1,0 +1,63 @@
+__pycache__/# FaceInsight Docker
+
+*.pyc# Ignore files not needed in Docker image
+
+*.pyo
+
+*.pyd# Python cache
+
+.Python__pycache__/
+
+*.so*.py[cod]
+
+*.egg*$py.class
+
+*.egg-info/*.so
+
+dist/.Python
+
+build/
+
+.git/# Virtual environments
+
+.gitignorevenv/
+
+.vscode/env/
+
+.idea/ENV/
+
+*.md
+
+!README.md# IDE
+
+.env.vscode/
+
+*.log.idea/
+
+.DS_Store*.swp
+
+uv.lock*.swo
+
+
+# Logs (will be created in container)
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (optional, keep if you want docs in image)
+*.md
+!README.md
+
+# Test files (optional)
+test_*.py
+*_test.py
+
+# Development files
+.env.example
+docker-compose.override.yml

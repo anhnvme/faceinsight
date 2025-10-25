@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="test-container">
+    <!-- Status/Progress Indicator -->
+        <div id="testStatus" class="status-message d-none">
+        <span id="testStatusText"></span>
+    </div>
+    
+    <div class="upload-section" id="uploadSection">
+        <input type="file" id="testImage" accept="image/*" style="display:none">
+        <button onclick="document.getElementById('testImage').click()" class="btn btn-primary">📸 Chọn Ảnh</button>
+    </div>
+    
+    <!-- Split Screen Layout -->
+    <div id="splitContainer" class="split-container" style="display: none;">
+        <div id="imagePanel" class="image-panel">
+            <div id="preview" class="preview-area"></div>
+        </div>
+        <div id="resultPanel" class="result-panel">
+            <div id="result" class="result-area"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/test.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Status Cards -->
+<div class="status-cards">
+    <div class="status-card">
+        <div class="status-card-icon blue">🤖</div>
+        <div class="status-card-content">
+            <div class="status-card-title">Recognition Model</div>
+            <div class="status-card-value">
+                {% if current_model == 'buffalo_s' %}Buffalo S
+                {% elif current_model == 'buffalo_l' %}Buffalo L
+                {% elif current_model == 'antelopev2' %}Antelope v2
+                {% else %}{{ current_model }}{% endif %}
+            </div>
+            <div class="status-card-badge badge-success">Active</div>
+        </div>
+    </div>
+    
+    <div class="status-card{% if not mqtt_configured %} status-card-warning{% endif %}">
+        <div class="status-card-icon {% if mqtt_configured %}green{% else %}orange{% endif %}">📡</div>
+        <div class="status-card-content">
+            <div class="status-card-title">MQTT Connection</div>
+            <div class="status-card-value">
+                {% if mqtt_configured %}
+                {{ mqtt_host }}
+                {% else %}
+                Not configured
+                {% endif %}
+            </div>
+            <div class="status-card-badge {% if mqtt_configured %}badge-success{% else %}badge-warning{% endif %}">
+                {% if mqtt_configured %}
+                Active
+                {% else %}
+                ⚠️ Chưa cấu hình
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="status-card">
+        <div class="status-card-icon teal">👥</div>
+        <div class="status-card-content">
+            <div class="status-card-title">Face Collection</div>
+            <div class="status-card-value">{{ persons|length }} người</div>
+            <div class="status-card-badge badge-info">{{ persons|sum(attribute='image_count') }} faces</div>
+        </div>
+    </div>
+    
+    <div class="status-card status-card-clickable" onclick="refreshStorage()" style="cursor: pointer;" title="Click để cập nhật dung lượng">
+        <div class="status-card-icon purple">💾</div>
+        <div class="status-card-content">
+            <div class="status-card-title">Storage Usage</div>
+            <div class="status-card-value" id="storageTotal">{{ storage_total or '0 MB' }}</div>
+            <div class="status-card-badge badge-info" id="storageDetails">
+                Models: <span id="storageModels">{{ storage_models or '0 MB' }}</span> | 
+                Data: <span id="storageData">{{ storage_data or '0 MB' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <h2>👥 Quản Lý Khuôn Mặt</h2>
+    <button onclick="showAddPersonModal()" class="btn btn-primary">➕ Thêm Người Mới</button>
+</div>
+
+<div class="persons-grid">
+    {% for person in persons %}
+    <div class="person-card" id="person-{{ person.id }}">
+        <div class="person-header">
+            <div class="person-info">
+                <h3>
+                    {% if person.nickname %} {{ person.nickname }} {%else %} {{ person.name }} {% endif %}
+                    <span id="upload-status-{{ person.id }}" class="upload-status" style="margin-left: 8px; font-size: 1.2rem;"></span>
+                </h3>
+                {% if person.nickname %}
+                <p class="nickname">{{ person.name }}</p>
+                {% endif %}
+            </div>
+            <span class="image-count">{{ person.image_count }}/{{ max_images }} ảnh - {{ person.embed_count }} embed</span>
+        </div>
+        <div class="person-images">
+            {% for img in person.images %}
+            <div class="image-item">
+                <img src="{{ url_for('static', filename=img.image_path.replace('static/', '')) }}" 
+                     alt="{{ person.name }}"
+                     onclick="showImagePreview('{{ img.original_image_path or img.image_path }}', '{{ person.nickname or person.name }}')"
+                     style="cursor: pointer;"
+                     title="Click để xem ảnh gốc">
+                <button onclick="deleteImage({{ person.id }}, {{ img.id }})" class="btn-delete">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="person-actions">
+            {% if person.image_count < max_images %}
+            <button onclick="addImage({{ person.id }})" class="btn btn-sm">Thêm Ảnh</button>
+            {% endif %}
+            <button onclick="editPerson({{ person.id }}, '{{ person.name }}', '{{ person.nickname or '' }}')" class="btn btn-sm">Sửa</button>
+            <button onclick="deletePerson({{ person.id }})" class="btn btn-sm btn-danger">Xóa</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="addPersonModal" class="modal d-none">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Thêm Người Mới</h3>
+        <form id="addPersonForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Nickname (*) - Tên hiển thị</label>
+                <input type="text" id="nicknameInput" name="nickname" required placeholder="VD: Việt Anh">
+            </div>
+            <div class="form-group">
+                <label>Tên (*) - Tự động tạo (có thể chỉnh sửa)</label>
+                <input type="text" id="nameInput" name="name" required placeholder="Sẽ tự động điền...">
+                <small id="namePreview" style="color: #667eea; font-weight: 600; display: block; margin-top: 0.25rem;">Nhập Nickname để tự động tạo tên</small>
+            </div>
+            <div class="form-group">
+                <label>Ảnh (Tối đa {{ max_images }})</label>
+                <input type="file" name="images" multiple accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+    </div>
+</div>
+
+<div id="editPersonModal" class="modal d-none">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3>Sửa Thông Tin</h3>
+        <form id="editPersonForm">
+            <input type="hidden" id="editPersonId">
+            <div class="form-group">
+                <label>Tên</label>
+                <input type="text" id="editName" name="name" disabled class="input-disabled">
+                <small class="text-small">Tên không thể thay đổi sau khi tạo</small>
+            </div>
+            <div class="form-group">
+                <label>Nickname (Tên hiển thị)</label>
+                <input type="text" id="editNickname" name="nickname">
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        </form>
+    </div>
+</div>
+
+<input type="file" id="imageInput" class="d-none" accept="image/*" multiple>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}

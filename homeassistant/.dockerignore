@@ -1,0 +1,53 @@
+# Ignore development files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Ignore git
+.git/
+.gitignore
+.gitattributes
+
+# Ignore documentation (not needed in container)
+README.md
+LICENSE
+
+# Ignore test data
+inbox/*
+!inbox/.gitkeep
+static/detect/*
+!static/detect/.gitkeep
+static/original/*
+!static/original/.gitkeep
+static/logs/*
+!static/logs/.gitkeep
+static/test/*
+!static/test/.gitkeep
+
+# Ignore database
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore local development
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore docker files (use specific Dockerfile)
+docker-compose.yml
+Dockerfile
+
+# Ignore addon development files
+homeassistant/build.sh
+homeassistant/INSTALL.md
+homeassistant/.gitignore

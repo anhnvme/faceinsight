@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  faceinsight:
+    build: .
+    container_name: faceinsight
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persist data
+      - ./static:/app/static
+      - ./inbox:/app/inbox
+      - ./models:/app/models
+      - ./face_recognition.db:/app/face_recognition.db
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Ho_Chi_Minh
+    # Use host network to connect to MQTT broker on host machine
+    network_mode: host

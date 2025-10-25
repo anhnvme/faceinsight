@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Face Recognition Manager{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">
+                <h1 class="nav-title">Face Recognition Manager</h1>
+            </a>
+            <div class="nav-toggle" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>
+                    <span>🏠</span> Dashboard
+                </a></li>
+                <li><a href="{{ url_for('history') }}" {% if request.endpoint == 'history' %}class="active"{% endif %}>
+                    <span>📜</span> History
+                </a></li>
+                <li><a href="{{ url_for('test_page') }}" {% if request.endpoint == 'test_page' %}class="active"{% endif %}>
+                    <span>🧪</span> Test
+                </a></li>
+                <li><a href="{{ url_for('settings') }}" {% if request.endpoint == 'settings' %}class="active"{% endif %}>
+                    <span>⚙️</span> Settings
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Global Progress Indicator -->
+    <div id="globalProgress" class="global-progress" style="display: none;">
+        <div class="progress-content">
+            <div class="progress-spinner"></div>
+            <div class="progress-text">
+                <div id="progressTitle" class="progress-title">Đang xử lý...</div>
+                <div id="progressDetail" class="progress-detail"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global Image Preview Modal -->
+    <div id="imagePreviewModal" class="modal d-none" onclick="if(event.target === this) closeImagePreview()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="imagePreviewTitle">Ảnh Gốc</h2>
+                <span class="close" onclick="closeImagePreview()">&times;</span>
+            </div>
+            <div class="image-container">
+                <img id="previewImage" src="" alt="Full Image" style="max-width: 100%; max-height: 80vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function toggleMenu() {
+        const navMenu = document.getElementById('navMenu');
+        navMenu.classList.toggle('active');
+    }
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const navMenu = document.getElementById('navMenu');
+        const navToggle = document.querySelector('.nav-toggle');
+        
+        if (navMenu && navToggle && 
+            !navMenu.contains(event.target) && 
+            !navToggle.contains(event.target)) {
+            navMenu.classList.remove('active');
+        }
+    });
+    
+    // Close menu when clicking a menu item
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('click', function() {
+            document.getElementById('navMenu').classList.remove('active');
+        });
+    });
+    </script>
+    
+    <!-- Common utilities (loaded on all pages) -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
