@@ -69,6 +69,7 @@ rm -rf /app/static/detect /app/static/original /app/static/logs
 ln -sf "${DATA_PATH}/static/detect" /app/static/detect
 ln -sf "${DATA_PATH}/static/original" /app/static/original
 ln -sf "${DATA_PATH}/static/logs" /app/static/logs
+ln -sf "${DATA_PATH}/static/test" /app/static/test
 
 bashio::log.info "Starting FaceInsight on ${HOST}:${PORT}"
 bashio::log.info "Configure MQTT and other settings in the web UI"

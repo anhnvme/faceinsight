@@ -20,7 +20,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
+homeassistant
 .env
 .venv
 env/

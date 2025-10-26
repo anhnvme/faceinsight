@@ -61,3 +61,5 @@ test_*.py
 # Development files
 .env.example
 docker-compose.override.yml
+homeassistant/
+run.sh

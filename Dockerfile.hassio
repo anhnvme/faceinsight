@@ -64,11 +64,6 @@ RUN mkdir -p /tmp/bashio && \
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
-# Healthcheck disabled - port is dynamic from config
-# User can check logs to verify startup
-# HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-#     CMD wget --no-verbose --tries=1 --spider http://localhost:6080/ || exit 1
-
 # Labels
 LABEL \
     io.hass.name="FaceInsight" \
