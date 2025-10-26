@@ -32,7 +32,13 @@ RUN apk add --no-cache \
     libgomp \
     ffmpeg-libs \
     libstdc++ \
-    wget
+    wget \
+    gfortran \
+    openblas \
+    libffi-dev \
+    openssl-dev \
+    cargo \
+    rust
 
 # Set working directory
 WORKDIR /app
@@ -40,9 +46,12 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir -r requirements.txt
+# Install Python dependencies with timeout and build tools
+RUN apk add --no-cache --virtual .build-deps \
+    build-base \
+    && pip3 install --no-cache-dir --upgrade pip setuptools wheel \
+    && pip3 install --no-cache-dir --timeout=300 -r requirements.txt \
+    && apk del .build-deps
 
 # Copy application code
 COPY app.py .
