@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     g++ \
+    jq \
     libgl1 \
     libglib2.0-0 \
     libsm6 \
