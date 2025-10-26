@@ -8,7 +8,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 class Database:
-    def __init__(self, db_path='face_recognition.db'):
+    def __init__(self, db_path=None):
+        # Support DATABASE_PATH env variable for Docker/HA addon
+        if db_path is None:
+            data_path = os.environ.get('DATA_PATH', '.')
+            db_path = os.path.join(data_path, 'face_recognition.db')
         self.db_path = db_path
         self.init_db()
     
