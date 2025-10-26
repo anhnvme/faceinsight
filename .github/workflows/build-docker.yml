@@ -23,12 +23,12 @@ jobs:
       matrix:
         arch:
           - amd64
-          - aarch64
+          # - aarch64  # Disabled for faster builds
         include:
           - arch: amd64
             platform: linux/amd64
-          - arch: aarch64
-            platform: linux/arm64
+          # - arch: aarch64
+          #   platform: linux/arm64
     
     steps:
       - name: Checkout code
