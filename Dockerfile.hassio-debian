@@ -1,41 +1,23 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base-python:3.11-alpine3.19
-FROM ${BUILD_FROM}
+# Override with Debian-based image for better package support
+FROM python:3.11-slim
 
 # Set shell
-SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install system dependencies
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    py3-numpy \
-    py3-opencv \
-    gcc \
-    g++ \
-    make \
-    cmake \
-    musl-dev \
-    python3-dev \
-    openblas-dev \
-    lapack-dev \
-    linux-headers \
-    jpeg-dev \
-    zlib-dev \
-    freetype-dev \
-    lcms2-dev \
-    openjpeg-dev \
-    tiff-dev \
-    harfbuzz-dev \
-    fribidi-dev \
-    libpng-dev \
-    libwebp-dev \
-    libgomp \
-    ffmpeg-libs \
-    libstdc++ \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
-    gfortran \
-    libffi-dev \
-    openssl-dev
+    curl \
+    ca-certificates \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libopenblas-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -43,18 +25,9 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Create requirements without opencv (use system package)
-RUN grep -v "opencv-python" requirements.txt > requirements-alpine.txt
-
 # Install Python dependencies
-# Use system opencv, install others via pip
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip3 install --no-cache-dir --timeout=600 \
-    flask \
-    paho-mqtt \
-    watchdog \
-    onnxruntime \
-    insightface
+    pip3 install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app.py .
@@ -72,6 +45,14 @@ RUN mkdir -p \
     /data \
     /share/faceinsight
 
+# Install bashio for Home Assistant integration
+ADD https://github.com/hassio-addons/bashio/archive/v0.16.2.tar.gz /tmp/bashio.tar.gz
+RUN mkdir -p /tmp/bashio && \
+    tar zxvf /tmp/bashio.tar.gz --strip 1 -C /tmp/bashio && \
+    mv /tmp/bashio/lib /usr/lib/bashio && \
+    ln -s /usr/lib/bashio/bashio /usr/bin/bashio && \
+    rm -rf /tmp/bashio /tmp/bashio.tar.gz
+
 # Copy run script for Home Assistant addon
 COPY homeassistant/run.sh /run.sh
 RUN chmod a+x /run.sh
@@ -87,6 +68,4 @@ LABEL \
     io.hass.type="addon" \
     maintainer="Anh Nguyen"
 
-# For standalone: python3 app.py
-# For Home Assistant addon: /run.sh (reads config from supervisor)
 CMD ["/run.sh"]

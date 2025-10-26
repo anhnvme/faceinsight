@@ -27,10 +27,8 @@ jobs:
         include:
           - arch: amd64
             platform: linux/amd64
-            base_image: ghcr.io/home-assistant/amd64-base-python:3.11-alpine3.19
           - arch: aarch64
             platform: linux/arm64
-            base_image: ghcr.io/home-assistant/aarch64-base-python:3.11-alpine3.19
     
     steps:
       - name: Checkout code
@@ -65,10 +63,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.hassio
+          file: ./Dockerfile.hassio-debian
           platforms: ${{ matrix.platform }}
-          build-args: |
-            BUILD_FROM=${{ matrix.base_image }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.arch }}:${{ steps.meta.outputs.version }}
