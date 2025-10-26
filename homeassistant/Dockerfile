@@ -43,7 +43,7 @@ COPY requirements.txt .
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
     pip3 install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application code from parent directory
 COPY app.py .
 COPY database.py .
 COPY face_processor.py .
@@ -60,7 +60,7 @@ RUN mkdir -p \
     /share/faceinsight
 
 # Copy run script
-COPY homeassistant/run.sh /
+COPY run.sh /
 RUN chmod a+x /run.sh
 
 # Healthcheck

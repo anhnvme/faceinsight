@@ -4,5 +4,6 @@
     "aarch64": "ghcr.io/home-assistant/aarch64-base-python:3.11-alpine3.19"
   },
   "squash": false,
-  "args": {}
+  "args": {},
+  "context": ".."
 }
