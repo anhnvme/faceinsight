@@ -5,6 +5,7 @@ set -e
 PORT=$(bashio::config 'web_port' 6080)
 DATA_PATH=$(bashio::config 'data_path' '/share/faceinsight')
 MODELS_PATH=$(bashio::config 'models_path' '')
+INBOX_PATH=$(bashio::config 'inbox_path' '')
 
 # Set environment variables
 export PORT="${PORT}"
@@ -32,10 +33,22 @@ else
     ln -sf "${DATA_PATH}/models" /app/models
 fi
 
+# Handle inbox path
+if [ -n "$INBOX_PATH" ] && [ "$INBOX_PATH" != "null" ] && [ "$INBOX_PATH" != "" ]; then
+    bashio::log.info "Using custom inbox path: ${INBOX_PATH}"
+    mkdir -p "${INBOX_PATH}"
+    rm -rf /app/inbox
+    ln -sf "${INBOX_PATH}" /app/inbox
+else
+    # Use default inbox path inside data_path
+    bashio::log.info "Using default inbox path: ${DATA_PATH}/inbox"
+    rm -rf /app/inbox
+    ln -sf "${DATA_PATH}/inbox" /app/inbox
+fi
+
 # Create symlinks for other data persistence
-rm -rf /app/database /app/inbox
+rm -rf /app/database
 ln -sf "${DATA_PATH}/database" /app/database
-ln -sf "${DATA_PATH}/inbox" /app/inbox
 
 # For static subdirectories, need to remove and recreate
 rm -rf /app/static/detect /app/static/original /app/static/logs
