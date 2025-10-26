@@ -51,7 +51,7 @@ RUN mkdir -p \
     /data \
     /share/faceinsight
 
-# Install bashio for reading Home Assistant config
+# Install bashio for Home Assistant integration
 ADD https://github.com/hassio-addons/bashio/archive/v0.16.2.tar.gz /tmp/bashio.tar.gz
 RUN mkdir -p /tmp/bashio && \
     tar zxvf /tmp/bashio.tar.gz --strip 1 -C /tmp/bashio && \
@@ -59,46 +59,8 @@ RUN mkdir -p /tmp/bashio && \
     ln -s /usr/lib/bashio/bashio /usr/bin/bashio && \
     rm -rf /tmp/bashio /tmp/bashio.tar.gz
 
-# Copy startup script
-COPY <<'EOF' /run.sh
-#!/usr/bin/env bashio
-set -e
-
-# Read options from Home Assistant
-export PORT=$(bashio::config 'web_port')
-export MQTT_HOST=$(bashio::config 'mqtt_host')
-export MQTT_PORT=$(bashio::config 'mqtt_port')
-export MQTT_USERNAME=$(bashio::config 'mqtt_username')
-export MQTT_PASSWORD=$(bashio::config 'mqtt_password')
-export MQTT_TOPIC=$(bashio::config 'mqtt_topic')
-export RECOGNITION_THRESHOLD=$(bashio::config 'recognition_threshold')
-export MAX_IMAGES_PER_PERSON=$(bashio::config 'max_images_per_person')
-export SESSION_SECRET=$(bashio::config 'session_secret')
-
-# Handle custom paths
-if bashio::config.true 'use_custom_paths'; then
-    export DATA_PATH=$(bashio::config 'data_path')
-    export INBOX_PATH=$(bashio::config 'inbox_path')
-    export MODELS_PATH=$(bashio::config 'models_path')
-else
-    export DATA_PATH="/share/faceinsight"
-fi
-
-# Create symlinks for data persistence
-mkdir -p "${DATA_PATH}"/{database,models,static/detect,static/original,static/logs,inbox}
-
-# Link directories
-ln -sf "${DATA_PATH}/database" /app/database || true
-ln -sf "${DATA_PATH}/models" /app/models || true
-ln -sf "${DATA_PATH}/static/detect" /app/static/detect || true
-ln -sf "${DATA_PATH}/static/original" /app/static/original || true
-ln -sf "${DATA_PATH}/inbox" /app/inbox || true
-
-bashio::log.info "Starting FaceInsight on port ${PORT}"
-cd /app
-exec python3 app.py
-EOF
-
+# Copy run script for Home Assistant addon
+COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
 # Healthcheck
