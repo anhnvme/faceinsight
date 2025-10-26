@@ -1,23 +1,18 @@
 # FaceInsight - Installation Guide
 
-## Installation (Recommended)
+## Installation Guide
 
-### Step 1: Add Repository to Home Assistant
+## Install the Add-on
 
-1. Navigate to **Settings** → **Add-ons** → **Add-on Store**
-2. Click the **⋮** menu (top right) → **Repositories**
-3. Add this repository URL:
-   ```
-   https://github.com/yourusername/faceinsight-addon
-   ```
-4. Click **Add** → **Close**
+1. **Add Repository to Home Assistant**
+   - Navigate to **Supervisor** → **Add-on Store** → **⋮** (top right) → **Repositories**
+   - Add: `https://github.com/anhnvme/faceinsight`
+   - Click **Add**
 
-### Step 2: Install FaceInsight Add-on
-
-1. Refresh the Add-on Store page
-2. Find **FaceInsight** in the list
-3. Click on it → Click **Install**
-4. Wait for installation to complete (2-3 minutes)
+2. **Install FaceInsight Add-on**
+   - Find **FaceInsight** in the add-on store
+   - Click **Install**
+   - Wait for installation to complete
 
 ### Step 3: Configure
 
@@ -220,9 +215,9 @@ The addon uses **symlinks** to connect these persistent folders to the container
 
 ## Support
 
-- 📖 [Documentation](https://github.com/yourusername/faceinsight-addon/blob/main/DOCS.md)
-- 🐛 [Report Issues](https://github.com/yourusername/faceinsight-addon/issues)
-- 💬 [Discussions](https://github.com/yourusername/faceinsight-addon/discussions)
+- 📖 [Documentation](https://github.com/anhnvme/faceinsight/blob/master/homeassistant/DOCS.md)
+- 🐛 [Report Issues](https://github.com/anhnvme/faceinsight/issues)
+- 💬 [Discussions](https://github.com/anhnvme/faceinsight/discussions)
 
 ---
 

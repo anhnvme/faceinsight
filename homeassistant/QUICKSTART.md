@@ -6,7 +6,7 @@
 
 1. **Settings** → **Add-ons** → **Add-on Store**
 2. Click **⋮** → **Repositories**
-3. Add: `https://github.com/yourusername/faceinsight-addon`
+3. Add: `https://github.com/anhnvme/faceinsight`
 4. Find **FaceInsight** → Click **Install**
 5. **Configuration**:
    ```yaml

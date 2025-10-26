@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "slug": "faceinsight",
   "description": "Face Recognition System with InsightFace for Home Assistant",
-  "url": "https://github.com/yourusername/faceinsight",
+  "url": "https://github.com/anhnvme/faceinsight",
   "arch": ["amd64", "aarch64"],
   "startup": "application",
   "boot": "auto",

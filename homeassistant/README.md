@@ -20,7 +20,7 @@ FaceInsight is a powerful face recognition system that integrates seamlessly wit
 1. **Add Repository**:
    - Navigate to Home Assistant Add-on Store
    - Click on the menu (⋮) → Repositories
-   - Add this repository URL: `https://github.com/yourusername/faceinsight-addon`
+   - Add this repository URL: `https://github.com/anhnvme/faceinsight`
 
 2. **Install Add-on**:
    - Find "FaceInsight" in the add-on store
@@ -235,9 +235,9 @@ automation:
 
 ## Support
 
-- 📖 [Documentation](https://github.com/yourusername/faceinsight)
-- 🐛 [Issue Tracker](https://github.com/yourusername/faceinsight/issues)
-- 💬 [Discussions](https://github.com/yourusername/faceinsight/discussions)
+- 📖 [Documentation](https://github.com/anhnvme/faceinsight)
+- 🐛 [Issue Tracker](https://github.com/anhnvme/faceinsight/issues)
+- 💬 [Discussions](https://github.com/anhnvme/faceinsight/discussions)
 
 ## Credits
 
