@@ -11,6 +11,7 @@ INBOX_PATH=$(bashio::config 'inbox_path' '')
 export PORT="${PORT}"
 export HOST="0.0.0.0"
 export DATA_PATH="${DATA_PATH}"
+export INBOX_PATH="${INBOX_PATH}"
 
 bashio::log.info "Web port: ${PORT}"
 bashio::log.info "Data path: ${DATA_PATH}"

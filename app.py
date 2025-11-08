@@ -161,7 +161,13 @@ def init_inbox_monitor():
     else:
         logger.info("No orphan files found")
     
-    inbox_monitor = InboxMonitor(face_processor, db, mqtt_client)
+    # Get inbox path from environment or use default
+    inbox_path = os.environ.get('INBOX_PATH', './inbox')
+    if not inbox_path or inbox_path == 'null' or inbox_path == '':
+        inbox_path = './inbox'
+    
+    logger.info(f"Initializing inbox monitor with path: {inbox_path}")
+    inbox_monitor = InboxMonitor(face_processor, db, mqtt_client, inbox_path)
     inbox_monitor.start()
 
 def save_face_image(person_id: int, person_name: str, temp_path: str, face_img, embedding) -> int:
