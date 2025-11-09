@@ -264,9 +264,7 @@ def add_person():
         files = request.files.getlist('images')
         for file in files[:10]:
             if file and file.filename:
-                # Save temp in test folder
-                if not os.path.exists('static/test'):
-                    os.makedirs('static/test', exist_ok=True)
+                # Save temp in test folder (directory created by run.sh or Dockerfile)
                 temp_path = f"static/test/temp_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
                 temp_files.append(temp_path)
                 file.save(temp_path)
@@ -325,9 +323,7 @@ def add_person_image(person_id):
         if not file:
             return jsonify({'error': 'Không có file'}), 400
         
-        # Save temp in test folder
-        if not os.path.exists('static/test'):
-            os.makedirs('static/test', exist_ok=True)
+        # Save temp in test folder (directory created by run.sh or Dockerfile)
         temp_path = f"static/test/temp_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
         file.save(temp_path)
         
@@ -369,9 +365,7 @@ def test_recognize():
         if not file:
             return jsonify({'error': 'Không có file'}), 400
         
-        # Save to test folder
-        if not os.path.exists('static/test'):
-            os.makedirs('static/test', exist_ok=True)
+        # Save to test folder (directory created by run.sh or Dockerfile)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
         temp_path = f"static/test/test_{timestamp}.jpg"
         file.save(temp_path)
