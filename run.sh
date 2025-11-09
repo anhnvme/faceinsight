@@ -18,7 +18,7 @@ bashio::log.info "Data path: ${DATA_PATH}"
 
 # Create data directories first
 bashio::log.info "Setting up data directories"
-mkdir -p "${DATA_PATH}"/{database,static/detect,static/original,static/logs,inbox}
+mkdir -p "${DATA_PATH}"/{database,static/detect,static/original,static/logs,static/test,inbox}
 
 # Handle models path - MUST remove existing /app/models first
 if [ -n "$MODELS_PATH" ] && [ "$MODELS_PATH" != "null" ] && [ "$MODELS_PATH" != "" ]; then
@@ -66,7 +66,7 @@ elif [ -f "${DATA_PATH}/database/face_recognition.db" ]; then
 fi
 
 # For static subdirectories, need to remove and recreate
-rm -rf /app/static/detect /app/static/original /app/static/logs
+rm -rf /app/static/detect /app/static/original /app/static/logs /app/static/test
 ln -sf "${DATA_PATH}/static/detect" /app/static/detect
 ln -sf "${DATA_PATH}/static/original" /app/static/original
 ln -sf "${DATA_PATH}/static/logs" /app/static/logs
